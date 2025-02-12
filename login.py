@@ -106,10 +106,10 @@ def login_main(url):
                     view_element = driver.find_element(By.XPATH, x_path)
                     driver.execute_script("arguments[0].scrollIntoView();", view_element)
 
-                    print('111111111111111111111111')
+
                     #记录练习日期、判断是否完成
                     date_element = driver.find_element(By.XPATH, data_path)
-                    print('2222222222222222222222')
+
                     date_text = date_element.text
 
                     if '创建时间' in date_text:
@@ -161,7 +161,7 @@ def login_main(url):
                         problem_correct_path = problem_correct_path % problem_index
                         problem_correct_element = driver.find_element(By.XPATH, problem_correct_path)
                         problem_color = problem_correct_element.value_of_css_property('color')
-                        if problem_color == '#bb312a':
+                        if problem_color == 'rgba(248, 53, 53, 1)':
                             problem_is_right = '错误'
                         else:
                             problem_is_right = '正确'
@@ -171,7 +171,7 @@ def login_main(url):
                         #正确率
                         correct_rate_path_f = '/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-solution-overall/div/div[3]/span[1]'
                         correct_rate_path_t = '/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-solution-overall/div/div[2]/span[1]'
-                        if problem_is_right == '错误':
+                        if '错误' in problem_is_right:
                             correct_rate_path = correct_rate_path_f % problem_index
                         else:
                             correct_rate_path = correct_rate_path_t % problem_index
@@ -184,7 +184,7 @@ def login_main(url):
                         #耗时
                         time_consuming_path_f = '/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-solution-overall/div/div[4]/span[1]'
                         time_consuming_path_t = '/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-solution-overall/div/div[3]/span[1]'
-                        if problem_is_right == '错误':
+                        if '错误' in problem_is_right:
                             time_consuming_path = time_consuming_path_f % problem_index
                         else:
                             time_consuming_path = time_consuming_path_t % problem_index
@@ -195,10 +195,10 @@ def login_main(url):
 
                         db.insert(db_data)
 
-
+                    time.sleep(2)
                     div_index = div_index + 1
                     back_button = wait.until(
-                        EC.element_to_be_clickable((By.XPATH, '/html/body/app-root/app-solution/app-nav-header/header/div/div[1]/a/svg'))
+                        EC.element_to_be_clickable((By.XPATH, '/html/body/app-root/app-solution/app-nav-header/header/div/div[1]/a'))
                     )
                     back_button.click()
                     time.sleep(3)

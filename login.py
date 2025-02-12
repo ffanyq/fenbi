@@ -1,3 +1,4 @@
+from pandas.core.dtypes.inference import is_complex
 from selenium import webdriver
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -71,7 +72,7 @@ def login_main(url):
             print("登录操作完成")
 
             # 等待登录完成
-            time.sleep(5)
+            time.sleep(8)
 
 
             #退到历史主页
@@ -79,14 +80,14 @@ def login_main(url):
                 EC.element_to_be_clickable((By.XPATH, '/html/body/app-root/div/app-main/div[2]/app-real-test/header/app-simple-nav-left-header/header/div/a/span'))
             )
             tiku_home.click()
-            time.sleep(5)
+            time.sleep(8)
 
             #点击历史主页
             history_home = wait.until(
                 EC.element_to_be_clickable((By.XPATH, '/html/body/app-root/div/app-main/div[2]/app-catalog/div/main/div[2]/div[1]/app-history-catalog/div/div[1]/a'))
             )
             history_home.click()
-            time.sleep(5)
+            time.sleep(8)
 
             #循环执行
             div_index = 1
@@ -98,15 +99,22 @@ def login_main(url):
 
                     x_path = x_path % div_index
                     data_path = data_path % div_index
+
                     print(x_path)
 
                     #滚动窗口以可见
                     view_element = driver.find_element(By.XPATH, x_path)
                     driver.execute_script("arguments[0].scrollIntoView();", view_element)
 
-                    #记录练习日期
+                    print('111111111111111111111111')
+                    #记录练习日期、判断是否完成
                     date_element = driver.find_element(By.XPATH, data_path)
+                    print('2222222222222222222222')
                     date_text = date_element.text
+
+                    if '创建时间' in date_text:
+                        div_index = div_index + 1
+                        continue
 
                     #进入练习页面
                     problem_page = wait.until(
@@ -138,12 +146,14 @@ def login_main(url):
                         db_data['problem_category'] = category
                         db_data['problem_index1'] = div_index
                         db_data['problem_index2'] = problem_index
+                        db_data['date_text'] = date_text
                         #题目文本
-                        problem_text_path = '/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-question-choice/div/article/p[1]/text()[1]'
+                        #/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-question-choice/div/article/p[1]/text()[1]
+                        problem_text_path = '/html/body/app-root/app-solution/div/app-tis/div/div[%d]/div/app-ti/div/div[2]/app-solution-choice/div/app-question-choice/div/article/p[1]'
                         problem_text_path = problem_text_path % problem_index
                         problem_text_element = driver.find_element(By.XPATH, problem_text_path)
                         problem_text= problem_text_element.text
-
+                        print(problem_text)
                         db_data['problem_text'] = problem_text
 
                         #题目正确与否
@@ -155,6 +165,7 @@ def login_main(url):
                             problem_is_right = '错误'
                         else:
                             problem_is_right = '正确'
+                        print(problem_is_right)
                         db_data['problem_is_right'] = problem_is_right
 
                         #正确率
@@ -167,6 +178,7 @@ def login_main(url):
 
                         correct_rate_element = driver.find_element(By.XPATH, correct_rate_path)
                         correct_rate = correct_rate_element.text
+                        print(correct_rate)
                         db_data['correct_rate'] = correct_rate
 
                         #耗时
@@ -178,13 +190,19 @@ def login_main(url):
                             time_consuming_path = time_consuming_path_t % problem_index
                         time_consuming_element = driver.find_element(By.XPATH, time_consuming_path)
                         time_consuming = time_consuming_element.text
+                        print(time_consuming)
                         db_data['time_consuming'] = time_consuming
 
                         db.insert(db_data)
 
 
                     div_index = div_index + 1
+                    back_button = wait.until(
+                        EC.element_to_be_clickable((By.XPATH, '/html/body/app-root/app-solution/app-nav-header/header/div/div[1]/a/svg'))
+                    )
+                    back_button.click()
                     time.sleep(3)
+
                 except NoSuchElementException:
                     print('未找到元素，跳出循环')
                     break
